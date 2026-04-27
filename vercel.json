@@ -3,13 +3,13 @@
   "trailingSlash": false,
   "headers": [
     {
-      "source": "/(pages|logos)/(.*)",
+      "source": "/assets/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
     {
-      "source": "/(cover-art\\.webp|favicon\\.svg)",
+      "source": "/favicon\\.svg",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
