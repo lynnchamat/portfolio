@@ -34,17 +34,19 @@ A custom domain can be wired up under the project's **Settings → Domains** tab
 
 ```
 Lynn Portfolio/
-├── Lynn Chamat Portfolio.pdf   # original source (kept for reference)
 ├── index.html                  # all 25 sections
 ├── styles.css                  # design tokens + components + responsive
 ├── app.js                      # scroll-reveal, page indicator, keyboard nav
 ├── favicon.svg
 ├── vercel.json                 # cache headers for static assets
-└── public/
+└── assets/
     ├── cover-art.webp          # extracted from PDF page 1
     ├── logos/                  # Mutual, The Ordinary, MUFE, Havas Red, Dubai Holding, L'Oréal
     └── pages/                  # rendered image-spread pages (4–7, 9, 11–15, 18–19, 21–24)
 ```
+
+The original PDF source and design drafts live in `source/` and are
+git-ignored — they don't ship with the deployed site.
 
 ## Keyboard shortcuts
 
