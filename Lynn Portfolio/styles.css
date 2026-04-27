@@ -1,0 +1,704 @@
+/* ─────────────────────────────────────────────
+   Lynn Chamat — Portfolio
+   Design tokens & global styles
+   ───────────────────────────────────────────── */
+
+:root {
+  /* Palette extracted from the PDF */
+  --cream: #EFE7DE;
+  --cream-deep: #E7DDD2;
+  --oxblood: #7A2A1F;
+  --oxblood-soft: #8A3A2A;
+  --ink: #0E0E0E;
+  --ink-soft: #1c1c1c;
+
+  /* Layout */
+  --slide-w: min(96vw, 1280px);
+  --slide-pad-x: clamp(28px, 4.5%, 64px);
+  --slide-pad-y: clamp(20px, 3.5%, 48px);
+  --frame-line: rgba(122, 42, 31, 0.45);
+
+  /* Typography */
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--cream);
+}
+
+body {
+  background: var(--cream);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+
+/* ─────────────────────────────────────────────
+   Top bar (subtle, persistent)
+   ───────────────────────────────────────────── */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px clamp(20px, 4vw, 56px);
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+.topbar > * { pointer-events: auto; }
+
+.topbar__brand {
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  opacity: 0.78;
+}
+.topbar__nav {
+  display: flex;
+  gap: 22px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.topbar__nav a {
+  color: var(--ink);
+  text-decoration: none;
+  opacity: 0.55;
+  transition: opacity 220ms var(--ease), color 220ms var(--ease);
+}
+.topbar__nav a:hover,
+.topbar__nav a.is-active {
+  opacity: 1;
+  color: var(--oxblood);
+}
+@media (max-width: 720px) {
+  .topbar__nav { display: none; }
+}
+
+/* ─────────────────────────────────────────────
+   Floating page indicator (mirrors PDF feel)
+   ───────────────────────────────────────────── */
+.page-indicator {
+  position: fixed;
+  right: clamp(16px, 3vw, 36px);
+  bottom: clamp(16px, 3vw, 28px);
+  z-index: 50;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--oxblood);
+  background: rgba(239, 231, 222, 0.85);
+  backdrop-filter: blur(6px);
+  padding: 6px 12px;
+  border: 1px solid var(--frame-line);
+  border-radius: 6px;
+}
+.page-indicator__num {
+  font-weight: 600;
+  min-width: 1.4em;
+  text-align: right;
+  display: inline-block;
+  transition: opacity 180ms var(--ease);
+}
+.page-indicator__total { opacity: 0.6; }
+.page-indicator.is-changing .page-indicator__num { opacity: 0; }
+
+/* ─────────────────────────────────────────────
+   Deck (snap container)
+   ───────────────────────────────────────────── */
+#deck {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  height: 100vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.slide {
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(32px, 6vh, 60px) clamp(16px, 3vw, 40px);
+  position: relative;
+}
+
+/* The framed page — the visual rectangle each slide lives in */
+.frame {
+  position: relative;
+  width: var(--slide-w);
+  aspect-ratio: 16 / 9;
+  background: var(--cream);
+  padding: var(--slide-pad-y) var(--slide-pad-x);
+  display: block;
+}
+
+/* Thin border frame — four lines insetting the page contents */
+.frame::before,
+.frame::after {
+  content: "";
+  position: absolute;
+  background: var(--frame-line);
+  pointer-events: none;
+}
+/* Horizontal lines (top & bottom) */
+.frame::before {
+  left: 0; right: 0;
+  height: 1px;
+  top: 7%;
+  box-shadow: 0 calc(86vh * 0) 0 0 var(--frame-line);
+}
+.frame::after {
+  left: 0; right: 0;
+  height: 1px;
+  bottom: 7%;
+}
+/* Vertical lines via inner pseudo on a wrapper */
+.frame {
+  background-image:
+    linear-gradient(to right, var(--frame-line), var(--frame-line)),
+    linear-gradient(to right, var(--frame-line), var(--frame-line));
+  background-size: 1px 100%, 1px 100%;
+  background-position: 2.4% 0, 97.6% 0;
+  background-repeat: no-repeat;
+}
+
+/* "Bare" frame wraps a full page-render image — no internal padding */
+.frame--bare {
+  padding: 0;
+  background-image: none;
+}
+.frame--bare::before,
+.frame--bare::after { display: none; }
+
+.page-render {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* ─────────────────────────────────────────────
+   Page-number badge (in-frame, top-right)
+   ───────────────────────────────────────────── */
+.badge {
+  position: absolute;
+  top: 4%;
+  right: 2.4%;
+  transform: translate(50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--oxblood);
+  border-radius: 6px;
+  color: var(--oxblood);
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--cream);
+  letter-spacing: 0;
+}
+
+/* ─────────────────────────────────────────────
+   Slide: COVER (page 1)
+   ───────────────────────────────────────────── */
+.slide--cover .frame { background-image: none; }
+.slide--cover .frame::before,
+.slide--cover .frame::after { display: none; }
+
+.cover {
+  width: 100%; height: 100%;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  align-items: end;
+  gap: clamp(20px, 4%, 60px);
+}
+.cover__copy {
+  padding-bottom: clamp(28px, 5%, 60px);
+  padding-left: clamp(8px, 2%, 20px);
+}
+.cover__title {
+  font-size: clamp(34px, 4.6vw, 64px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0 0 18px;
+  color: var(--ink);
+}
+.cover__tagline {
+  font-size: clamp(13px, 1.05vw, 16px);
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+  color: var(--ink);
+  max-width: 26em;
+}
+.cover__art {
+  margin: 0;
+  align-self: stretch;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+.cover__art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  background: #000;
+}
+
+/* ─────────────────────────────────────────────
+   Slide: SECTION DIVIDERS (pages 2, 10, 16)
+   ───────────────────────────────────────────── */
+.divider {
+  width: 100%; height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(40px, 8%, 96px);
+  text-align: left;
+}
+.divider__label {
+  display: inline-block;
+  padding: 10px 18px;
+  border: 1px solid var(--oxblood);
+  border-radius: 4px;
+  color: var(--oxblood);
+  font-size: clamp(12px, 1.05vw, 14px);
+  letter-spacing: 0.16em;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.divider__copy {
+  font-size: clamp(14px, 1.15vw, 17px);
+  line-height: 1.45;
+  max-width: 28em;
+  margin: 0;
+  color: var(--ink);
+}
+
+/* ─────────────────────────────────────────────
+   Slide: PROJECT INTROS (pages 3, 8, 17, 20)
+   ───────────────────────────────────────────── */
+.intro {
+  width: 100%; height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: clamp(28px, 4%, 56px);
+  padding-top: clamp(24px, 3%, 40px);
+}
+.intro__brands {
+  display: flex;
+  align-items: center;
+  gap: clamp(36px, 4.6%, 76px);
+  flex-wrap: wrap;
+  min-height: 100px;
+}
+.intro__brands .logo {
+  width: auto;
+  object-fit: contain;
+}
+/* Single-line wordmarks. Mutual is friendly lowercase, so it can carry a taller cap;
+   HAVAS/L'OREAL are bold all-caps, so a smaller height gives them comparable visual weight. */
+.intro__brands .logo--mutual { height: clamp(38px, 4.1vw, 58px); }
+.intro__brands .logo--havas { height: clamp(30px, 3.2vw, 46px); }
+.intro__brands .logo--loreal { height: clamp(30px, 3.2vw, 46px); }
+/* Wordmark with small header ("The"): a touch taller so "Ordinary." cap matches the tier above */
+.intro__brands .logo--ordinary { height: clamp(50px, 5.4vw, 76px); }
+/* Stacked logos: taller bounding box than single-line, sized so per-line caps feel comparable */
+.intro__brands .logo--mufe { height: clamp(68px, 7.4vw, 104px); }
+/* Dubai's optical center sits between DUBAI and HOLDING; nudge up so DUBAI letterforms
+   align with the neighbour's center and HOLDING doesn't dangle below the row */
+.intro__brands .logo--dubai { height: clamp(44px, 4.7vw, 68px); transform: translateY(-18%); }
+
+.intro__body {
+  max-width: 90%;
+  font-size: clamp(13px, 1.05vw, 16px);
+  line-height: 1.55;
+  color: var(--ink);
+}
+.intro__body p { margin: 0 0 1.1em; }
+.intro__body p:last-child { margin-bottom: 0; }
+
+/* ─────────────────────────────────────────────
+   Slide: THANK YOU (page 25)
+   ───────────────────────────────────────────── */
+.thanks {
+  width: 100%; height: 100%;
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  align-items: center;
+  gap: clamp(20px, 4%, 60px);
+}
+.thanks__title {
+  font-size: clamp(64px, 9vw, 156px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  margin: 0;
+  color: var(--ink);
+}
+.thanks__star {
+  width: clamp(140px, 18vw, 240px);
+  height: auto;
+  color: var(--oxblood);
+  justify-self: center;
+}
+
+/* ─────────────────────────────────────────────
+   Animations (restrained)
+   ───────────────────────────────────────────── */
+
+/* Slide reveal — first time the slide enters the viewport */
+.slide .frame > *,
+.slide .cover,
+.slide .divider,
+.slide .intro,
+.slide .thanks {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 600ms var(--ease), transform 600ms var(--ease);
+}
+.slide.is-revealed .frame > *,
+.slide.is-revealed .cover,
+.slide.is-revealed .divider,
+.slide.is-revealed .intro,
+.slide.is-revealed .thanks {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Cover stagger */
+.slide--cover .cover__title,
+.slide--cover .cover__tagline {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 800ms var(--ease), transform 800ms var(--ease);
+}
+.slide--cover .cover__art {
+  opacity: 0;
+  transform: none;
+  /* Gentle, slow opacity fade-in replaces the old mask wipe */
+  transition: opacity 1800ms var(--ease) 500ms;
+}
+.slide--cover.is-revealed .cover__title { transition-delay: 120ms; opacity: 1; transform: none; }
+.slide--cover.is-revealed .cover__tagline { transition-delay: 260ms; opacity: 1; transform: none; }
+.slide--cover.is-revealed .cover__art { opacity: 1; }
+
+/* Asterisk: slow continuous rotation + soft pulse */
+.thanks__star {
+  animation: starRotate 40s linear infinite, starPulse 6s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+@keyframes starRotate { to { transform: rotate(360deg); } }
+@keyframes starPulse  { 0%,100% { opacity: 0.92; } 50% { opacity: 0.7; } }
+
+/* THANK YOU big scale-in */
+.slide--thanks .thanks__title {
+  transition-delay: 120ms;
+}
+
+/* Page render hover lift */
+.frame--bare {
+  transition: transform 380ms var(--ease), box-shadow 380ms var(--ease);
+}
+.frame--bare:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 50px -28px rgba(14, 14, 14, 0.35);
+}
+
+/* Section-label outline draw-on (used on dividers when revealed) */
+.slide--divider .divider__label {
+  position: relative;
+  isolation: isolate;
+}
+.slide--divider .divider__label::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--oxblood);
+  border-radius: 4px;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 700ms var(--ease) 200ms;
+}
+.slide--divider.is-revealed .divider__label::after {
+  clip-path: inset(0 0 0 0);
+}
+
+/* ─────────────────────────────────────────────
+   Cute / interactive layer
+   ───────────────────────────────────────────── */
+
+/* Stack content above decorative drifters */
+.slide--cover .cover,
+.slide--thanks .thanks {
+  position: relative;
+  z-index: 1;
+}
+
+/* When a parent has been split, its own reveal fade is taken over by its children,
+   so the parent should be a steady, transparent-to-layout container. */
+.cover__title.is-split,
+.cover__tagline.is-split,
+.thanks__title.is-split,
+.divider__copy.is-split {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Per-letter / per-word splits — base state */
+.is-split .char,
+.is-split .word {
+  display: inline-block;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+/* Group of letters that must stay on the same line as one word */
+.is-split .char-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Cover title: bouncy letter pop-in */
+.cover__title.is-split .char {
+  transform: translateY(18px) scale(0.85) rotate(-6deg);
+  transition:
+    opacity 600ms var(--ease) calc(var(--i, 0) * 35ms),
+    transform 700ms var(--ease-bounce) calc(var(--i, 0) * 35ms);
+}
+.slide--cover.is-revealed .cover__title.is-split .char {
+  opacity: 1;
+  transform: none;
+}
+
+/* Cover tagline: gentle word stagger, kicks in after the title */
+.cover__tagline.is-split .word {
+  transform: translateY(8px);
+  transition:
+    opacity 540ms var(--ease) calc(420ms + var(--i, 0) * 28ms),
+    transform 540ms var(--ease) calc(420ms + var(--i, 0) * 28ms);
+}
+.slide--cover.is-revealed .cover__tagline.is-split .word {
+  opacity: 1;
+  transform: none;
+}
+
+/* Cover art: gentle breathing float after the mask reveal completes */
+.slide--cover.is-revealed .cover__art img {
+  animation: artFloat 4.6s ease-in-out 1500ms infinite;
+}
+@keyframes artFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+/* Cover art hover */
+.slide--cover .cover__art img {
+  transition: transform 380ms var(--ease-bounce);
+}
+.slide--cover .cover__art:hover img {
+  transform: scale(1.02) rotate(0.8deg);
+}
+
+/* Thanks title: gentle bounce entrance */
+.thanks__title.is-split .char {
+  transform: translateY(22px) scale(0.88) rotate(-4deg);
+  transition:
+    opacity 600ms var(--ease) calc(var(--i, 0) * 45ms),
+    transform 700ms cubic-bezier(0.34, 1.25, 0.64, 1) calc(var(--i, 0) * 45ms);
+}
+.slide--thanks.is-revealed .thanks__title.is-split .char {
+  opacity: 1;
+  transform: none;
+}
+
+/* Wrapper around the star — gives burst particles a positioned root */
+.thanks__star-wrap {
+  position: relative;
+  display: inline-block;
+  justify-self: center;
+}
+.thanks__star-wrap .thanks__star {
+  display: block;
+}
+
+/* Decorative drifting asterisks (cover + thanks backgrounds) */
+.deco-asterisk {
+  position: absolute;
+  color: var(--oxblood);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  animation: asteriskDrift var(--dur, 18s) ease-in-out var(--delay, 0s) infinite,
+             asteriskFadeIn 1200ms var(--ease) var(--delay, 0s) forwards;
+  transform-origin: 50% 50%;
+}
+/* Cover: hold the asterisks back until after the floral has finished its 500ms + 1800ms fade */
+.slide--cover .deco-asterisk {
+  animation-delay: calc(2300ms + var(--delay, 0s)), calc(2300ms + var(--delay, 0s));
+}
+@keyframes asteriskFadeIn {
+  to { opacity: var(--opacity, 0.24); }
+}
+@keyframes asteriskDrift {
+  0%   { translate: 0 0;   rotate: 0deg;   }
+  25%  { translate: 8px -10px; rotate: 90deg;  }
+  50%  { translate: -6px 6px;  rotate: 180deg; }
+  75%  { translate: 10px 8px;  rotate: 270deg; }
+  100% { translate: 0 0;   rotate: 360deg; }
+}
+
+/* Burst particles (thank-you slide) */
+.burst-particle {
+  position: absolute;
+  color: var(--oxblood);
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  width: 18px;
+  height: 18px;
+  margin: -9px 0 0 -9px;
+  opacity: 0;
+  animation: burstFly 1300ms var(--ease) forwards;
+}
+@keyframes burstFly {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.4) rotate(0deg); }
+  25%  { opacity: 0.18; }
+  100% { opacity: 0;
+         transform: translate(var(--dx, 100px), var(--dy, -100px)) scale(1) rotate(180deg); }
+}
+
+/* Divider: word-by-word copy reveal (tasteful) */
+.divider__copy.is-split .word {
+  transform: translateY(6px);
+  transition:
+    opacity 480ms var(--ease) calc(800ms + var(--i, 0) * 25ms),
+    transform 480ms var(--ease) calc(800ms + var(--i, 0) * 25ms);
+}
+.slide--divider.is-revealed .divider__copy.is-split .word {
+  opacity: 1;
+  transform: none;
+}
+
+/* Divider: small static asterisk beside the label */
+.divider__label-deco {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+.divider__label-deco .deco-mark {
+  width: 14px;
+  height: 14px;
+  color: var(--oxblood);
+  opacity: 0;
+  transition: opacity 500ms var(--ease) 900ms;
+}
+.slide--divider.is-revealed .divider__label-deco .deco-mark {
+  opacity: 0.55;
+}
+
+/* Divider: thin underline accent beneath the copy */
+.divider__rule {
+  display: block;
+  width: 40px;
+  height: 1px;
+  background: var(--oxblood);
+  opacity: 0.4;
+  margin-top: 18px;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 600ms var(--ease) calc(900ms + var(--word-count, 20) * 25ms);
+}
+.slide--divider.is-revealed .divider__rule {
+  clip-path: inset(0 0 0 0);
+}
+
+/* ─────────────────────────────────────────────
+   Reduced motion — kill all animations
+   ───────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  #deck { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .slide .frame > *,
+  .slide .cover,
+  .slide .divider,
+  .slide .intro,
+  .slide .thanks,
+  .slide--cover .cover__title,
+  .slide--cover .cover__tagline,
+  .slide--cover .cover__art,
+  .is-split .char,
+  .is-split .word,
+  .divider__label-deco .deco-mark {
+    opacity: 1 !important;
+    transform: none !important;
+    -webkit-mask-image: none !important;
+            mask-image: none !important;
+  }
+  .divider__rule { clip-path: none !important; }
+  .deco-asterisk,
+  .burst-particle { display: none !important; }
+}
+
+/* ─────────────────────────────────────────────
+   Mobile / small-screen
+   ───────────────────────────────────────────── */
+@media (max-width: 760px) {
+  #deck {
+    scroll-snap-type: y proximity;
+  }
+  .slide {
+    height: auto;
+    min-height: 70vh;
+    padding: 32px 14px;
+  }
+  .frame {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+  }
+  .cover {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 0.8fr;
+    align-items: end;
+  }
+  .cover__art { aspect-ratio: 4 / 5; height: auto; }
+  .thanks {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .thanks__star { justify-self: center; }
+  .intro__body { max-width: 100%; }
+  .page-indicator { display: none; }
+}
+
+/* ─────────────────────────────────────────────
+   Selection
+   ───────────────────────────────────────────── */
+::selection { background: var(--oxblood); color: var(--cream); }
